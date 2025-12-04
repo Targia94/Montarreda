@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Montarreda">
+    <link rel="apple-touch-icon" href="static/icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <title>Lavoro - Montarreda</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    <!-- Database and API -->
+    <script src="static/js/db.js"></script>
+    <script src="static/js/api.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-cube text-primary"></i> Montarreda
+            </div>
+            <ul class="sidebar-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="timbrature.html" class="nav-link">
+                        <i class="fas fa-clock"></i> Timbrature
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="lavoro.html" class="nav-link active">
+                        <i class="fas fa-clipboard-list"></i> Lavoro
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="esportazione.html" class="nav-link">
+                        <i class="fas fa-file-export"></i> Esportazione
+                    </a>
+                </li>
+            </ul>
+            <div class="p-3">
+                <button class="btn btn-danger w-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary d-md-none me-3" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="m-0">Gestione Lavoro</h4>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-secondary small">Giovanni</span>
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Seleziona Data</h5>
+                    </div>
+                    <div class="d-flex align-items-end gap-3">
+                        <div>
+                            <label class="form-label text-secondary small fw-bold">Giorno</label>
+                            <input type="date" id="data-lavoro" class="form-control" style="width: 200px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="caricaLavori()">
+                            <i class="fas fa-calendar-check me-2"></i> Carica
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Nuovo Lavoro</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Commessa</th>
+                                    <th>Cliente</th>
+                                    <th>Contratto</th>
+                                    <th>Saldo</th>
+                                    <th>Extra</th>
+                                    <th>Stato Saldo</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select id="commessa" class="form-select form-select-sm">
+                                            <option value="">Seleziona</option>
+                                            <option value="MOOV">MOOV</option>
+                                            <option value="OLIE">OLIE</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" id="cliente" class="form-control form-control-sm" placeholder="Cliente"></td>
+                                    <td><input type="number" id="importo" class="form-control form-control-sm" placeholder="€"></td>
+                                    <td><input type="number" id="saldato" class="form-control form-control-sm" placeholder="€"></td>
+                                    <td><input type="number" id="extra-consegna" class="form-control form-control-sm" placeholder="€"></td>
+                                    <td>
+                                        <select id="saldo" class="form-select form-select-sm">
+                                            <option value="">Seleziona</option>
+                                            <option value="Contanti">Contanti</option>
+                                            <option value="Assegno">Assegno</option>
+                                            <option value="Bonifico">Bonifico</option>
+                                            <option value="Pag. Negozio">Pag. Negozio</option>
+                                            <option value="Finanziamento">Finanziamento</option>
+                                            <option value="Sospeso">Sospeso</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm" onclick="salvaLavoro()">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Riepilogo Giornaliero</h5>
+                    </div>
+                    <ul id="riepilogo-lavori" class="list-group list-group-flush"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        async function eliminaLavoro(lavoroId) {
+            if (!confirm("Sei sicuro di voler eliminare questo lavoro?")) return;
+
+            try {
+                await API.deleteLavoro(lavoroId);
+
+                // alert("Lavoro eliminato con successo!"); // Rimosso alert invasivo
+                caricaLavori(); 
+
+            } catch (error) {
+                alert(`Errore: ${error.message}`);
+            }
+        }
+
+        async function caricaLavori() {
+            const dataLavoro = document.getElementById("data-lavoro").value;
+            if (!dataLavoro) {
+                alert("Seleziona una data!");
+                return;
+            }
+
+            try {
+                const lavori = await API.getLavori(dataLavoro);
+                const riepilogo = document.getElementById("riepilogo-lavori");
+                riepilogo.innerHTML = "";
+
+                if (lavori.length === 0) {
+                    riepilogo.innerHTML = `<li class="list-group-item text-muted text-center py-4">
+                        <i class="fas fa-search fa-2x mb-2 d-block opacity-25"></i>
+                        Nessun lavoro trovato per questa data
+                    </li>`;
+                    return;
+                }
+
+               lavori.forEach(lavoro => {
+                riepilogo.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-primary rounded-pill">${lavoro.commessa}</span>
+                                <strong class="text-primary">${lavoro.cliente}</strong>
+                            </div>
+                            <div class="small text-secondary">
+                                <span class="me-3"><i class="fas fa-file-invoice-dollar me-1"></i> Contratto: <strong>€${(lavoro.contratto ?? 0).toFixed(2)}</strong></span>
+                                <span class="me-3"><i class="fas fa-hand-holding-usd me-1"></i> Saldato: <strong>€${(lavoro.saldato ?? 0).toFixed(2)}</strong></span>
+                                <span class="me-3"><i class="fas fa-truck me-1"></i> Extra: <strong>€${(lavoro.extra_consegna ?? 0).toFixed(2)}</strong></span>
+                                <span><i class="fas fa-credit-card me-1"></i> ${lavoro.saldo}</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" onclick="eliminaLavoro(${lavoro.id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </li>`;
+            });
+
+
+            } catch (error) {
+                alert(`Errore: ${error.message}`);
+            }
+        }
+
+        async function salvaLavoro() {
+            const dataLavoro = document.getElementById("data-lavoro").value;
+            const cliente = document.getElementById("cliente").value;
+            const importo = document.getElementById("importo").value;
+            const saldato = document.getElementById("saldato").value;
+            const commessa = document.getElementById("commessa").value;
+            const saldo = document.getElementById("saldo").value;
+            let extraConsegna = parseFloat(document.getElementById("extra-consegna").value) || 0;
+
+            if (!dataLavoro || !cliente || !importo || !saldato || !commessa || !saldo) {
+                alert("Compila tutti i campi obbligatori!");
+                return;
+            }
+
+            try {
+                await API.saveLavoro({
+                    data: dataLavoro,
+                    cliente,
+                    contratto: parseFloat(importo),
+                    saldato: parseFloat(saldato),
+                    commessa,
+                    saldo,
+                    extra_consegna: parseFloat(extraConsegna),
+                });
+
+                // Pulisci i campi dopo il salvataggio
+                document.getElementById("cliente").value = "";
+                document.getElementById("importo").value = "";
+                document.getElementById("saldato").value = "";
+                document.getElementById("extra-consegna").value = "";
+                
+                caricaLavori(); 
+
+            } catch (error) {
+                alert(`Errore: ${error.message}`);
+            }
+        }
+        
+        // Registrazione Service Worker per PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registrato', reg))
+                    .catch(err => console.log('[PWA] Errore registrazione SW', err));
+            });
+        }
+    </script>
+
+</body>
+</html>

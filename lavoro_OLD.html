@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserimento Lavoro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark px-3">
+        <span class="navbar-brand">Gestione Lavoro</span>
+        <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+    </nav>
+
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="bg-secondary text-white p-3 vh-100" style="width: 250px;">
+            <h4>Menu</h4>
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="timbrature.html" class="nav-link text-white">🕒 Timbrature</a></li>
+                <li class="nav-item"><a href="lavoro.html" class="nav-link text-white">📝 Inserimento Lavoro</a></li>
+                <li class="nav-item"><a href="esportazione.html" class="nav-link text-white">📤 Esportazione</a></li>
+            </ul>
+        </div>
+
+        <!-- Contenuto principale -->
+        <div class="container mt-4">
+            <h2>Inserimento Lavoro</h2>
+
+            <!-- Selezione data -->
+            <div class="d-flex align-items-end gap-2">
+            <div>
+                <label class="form-label">Seleziona Giorno</label>
+                    <input type="date" id="data-lavoro" class="form-control form-control-sm" style="width: 150px;">
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="caricaLavori()">📅 Carica</button>
+            </div>
+
+
+            <!-- Riepilogo lavori -->
+            <div class="mt-4">
+                <h4>Riepilogo Lavori</h4>
+                <ul id="riepilogo-lavori" class="list-group"></ul>
+            </div>
+
+            <!-- Inserimento nuovo lavoro -->
+            <div class="mt-4">
+                <h4>Aggiungi Nuovo Lavoro</h4>
+                <div class="d-flex gap-2">
+                    <input type="text" id="cliente" class="form-control form-control-sm" placeholder="Cliente">
+                    <input type="number" id="ore" class="form-control form-control-sm" placeholder="Ore">
+                    <input type="number" id="importo" class="form-control form-control-sm" placeholder="Importo">
+                    <button class="btn btn-success btn-sm" onclick="salvaLavoro()">Salva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function eliminaLavoro(lavoroId) {
+            if (!confirm("Sei sicuro di voler eliminare questo lavoro?")) return;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/lavoro/${lavoroId}`, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) throw new Error("Errore nell'eliminazione");
+
+                alert("Lavoro eliminato con successo!");
+                caricaLavori(); // Ricarica la lista dopo l'eliminazione
+
+            } catch (error) {
+                alert(`Errore: ${error.message}`);
+            }
+        }
+
+
+        async function caricaLavori() {
+            const dataLavoro = document.getElementById("data-lavoro").value;
+            if (!dataLavoro) {
+                alert("Seleziona una data!");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/lavoro", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ data: dataLavoro })
+                });
+
+                if (!response.ok) throw new Error("Errore nel caricamento");
+
+                const lavori = await response.json();
+                const riepilogo = document.getElementById("riepilogo-lavori");
+                riepilogo.innerHTML = "";
+
+                if (lavori.length === 0) {
+                    riepilogo.innerHTML = `<li class="list-group-item text-muted">🔍 Nessun risultato trovato per questa data</li>`;
+                    return;
+                }
+
+                lavori.forEach(lavoro => {
+                    riepilogo.innerHTML += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>${lavoro.cliente}</strong> - Ore: ${lavoro.ore} - €${lavoro.importo.toFixed(2)}</span>
+                            <button class="btn btn-outline-danger btn-sm p-1" onclick="eliminaLavoro(${lavoro.id})">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
+
+                        </li>`;
+                });
+
+            } catch (error) {
+                alert(`Errore: ${error.message}`);
+            }
+        }
+
+
+
+        async function salvaLavoro() {
+            const dataLavoro = document.getElementById("data-lavoro").value;
+            const cliente = document.getElementById("cliente").value;
+            const ore = document.getElementById("ore").value;
+            const importo = document.getElementById("importo").value;
+
+            if (!dataLavoro || !cliente || !ore || !importo) {
+                alert("Compila tutti i campi!");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/lavoro/nuovo", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ data: dataLavoro, cliente, ore: parseFloat(ore), importo: parseFloat(importo) })
+                });
+
+                if (!response.ok) throw new Error("Errore durante il salvataggio");
+
+                caricaLavori(); // Ricarica la lista dopo l'inserimento
+
+            } catch (error) {
+                alert(`Errore: ${error.message}`);
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Montarreda">
+    <link rel="apple-touch-icon" href="static/icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <title>Esportazione - Montarreda</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Database and API -->
+    <script src="static/js/db.js"></script>
+    <script src="static/js/api.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-cube text-primary"></i> Montarreda
+            </div>
+            <ul class="sidebar-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="timbrature.html" class="nav-link">
+                        <i class="fas fa-clock"></i> Timbrature
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="lavoro.html" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i> Lavoro
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="esportazione.html" class="nav-link active">
+                        <i class="fas fa-file-export"></i> Esportazione
+                    </a>
+                </li>
+            </ul>
+            <div class="p-3">
+                <button class="btn btn-danger w-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary d-md-none me-3" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="m-0">Esportazione Dati</h4>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-secondary small">Giovanni</span>
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0"><i class="fas fa-tasks me-2"></i> Esportazione Attività</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end mb-3">
+                            <div class="col-auto">
+                                <label class="form-label text-secondary small fw-bold">Data Da</label>
+                                <input type="date" id="data_da" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <label class="form-label text-secondary small fw-bold">Data A</label>
+                                <input type="date" id="data_a" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <label class="form-label text-secondary small fw-bold">Commessa</label>
+                                <select id="commessa" class="form-select" style="width: 150px;">
+                                    <option value="">Tutte</option>
+                                    <option value="MOOV">MOOV</option>
+                                    <option value="OLIE">OLIE</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-primary" onclick="caricaDati()">
+                                    <i class="fas fa-search me-2"></i> Carica
+                                </button>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-success" onclick="esportaPDF()">
+                                    <i class="fas fa-file-pdf me-2"></i> Esporta PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead id="tabella-header"></thead>
+                                <tbody id="risultati">
+                                    <tr><td colspan="7" class="text-center text-muted py-5">
+                                        <i class="fas fa-table fa-3x mb-3 d-block opacity-25"></i>
+                                        Seleziona i parametri e clicca "Carica" per visualizzare i dati
+                                    </td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Riepilogo Totali -->
+                <div id="riepilogo"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        async function esportaPDF() {
+            const dataDa = document.getElementById("data_da").value;
+            const dataA = document.getElementById("data_a").value;
+            const commessa = document.getElementById("commessa").value;
+
+            try {
+                await API.esportaPDF({ data_da: dataDa, data_a: dataA, commessa });
+            } catch (error) {
+                console.error("❌ Errore nell'esportazione:", error);
+                alert("Errore durante l'esportazione del PDF.");
+            }
+        }
+
+        function aggiornaTabellaHeader() {
+            const header = document.getElementById("tabella-header");
+            header.innerHTML = `
+                <tr>
+                    <th>Commessa</th>
+                    <th>Data</th>
+                    <th>Cliente</th>
+                    <th>Pagamento</th>
+                    <th>Contratto</th>
+                    <th>Saldo</th>
+                    <th>Extra Consegna</th>
+                </tr>`;
+        }
+
+        async function caricaDati() {
+            const dataDa = document.getElementById("data_da").value;
+            const dataA = document.getElementById("data_a").value;
+            const commessa = document.getElementById("commessa").value;
+
+            try {
+                const data = await API.getAttivita({ data_da: dataDa, data_a: dataA, commessa });
+
+                const risultati = document.getElementById("risultati");
+                risultati.innerHTML = "";
+
+                if (data.lavori.length === 0) {
+                    risultati.innerHTML = `<tr><td colspan="7" class="text-center">Nessuna attività trovata</td></tr>`;
+                    return;
+                }
+
+                let totaleContratto = 0;
+                let totaleSaldato = 0;
+                let extraSuConsegne = 0;
+
+                data.lavori.forEach(l => {
+                    totaleContratto += l.contratto;
+                    extraSuConsegne += l.extra_consegna;
+                    if (l.saldo !== "Sospeso" || l.saldo !== "Pag. Negozio") {
+                        totaleSaldato += l.saldato;
+                    }
+
+                    risultati.innerHTML += `
+                    <tr>
+                        <td>${l.commessa}</td>
+                        <td>${l.data}</td>
+                        <td>${l.cliente}</td>
+                        <td>${l.saldo}</td>
+                        <td>${l.contratto.toFixed(2)}€</td>
+                        <td>${l.saldato.toFixed(2)}€</td>
+                        <td>${l.extra_consegna.toFixed(2)}€</td>
+                    </tr>`;
+                });
+
+                let percentualeTrasporto = totaleContratto * 0.06;
+                let totaleLordo = percentualeTrasporto + extraSuConsegne;
+
+                risultati.innerHTML += `
+                    <tr class="fw-bold">
+                        <td colspan="4">Totale</td>
+                        <td>${totaleContratto.toFixed(2)}€</td>
+                        <td>${totaleSaldato.toFixed(2)}€</td>
+                        <td>${extraSuConsegne.toFixed(2)}€</td>
+                    </tr>`;
+
+                // **Aggiorna il riepilogo totali**
+                document.getElementById("riepilogo").innerHTML = `
+                <div class="row g-3 mt-2">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0"><i class="fas fa-calculator me-2"></i> Riepilogo Totali</h5>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                        <tr><td>Totale Contratto</td><td class="text-end fw-bold">${totaleContratto.toFixed(2)}€</td></tr>
+                                        <tr><td>Percentuale Trasporto (6%)</td><td class="text-end">${percentualeTrasporto.toFixed(2)}€</td></tr>
+                                        <tr><td>Extra su Consegne</td><td class="text-end">${extraSuConsegne.toFixed(2)}€</td></tr>
+                                        <tr class="table-primary"><td class="fw-bold">Totale Lordo</td><td class="text-end fw-bold">${totaleLordo.toFixed(2)}€</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0"><i class="fas fa-money-bill-wave me-2"></i> Dettaglio Pagamenti</h5>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                        <tr><td>Totale Contanti</td><td class="text-end">${data.totali.contanti.toFixed(2)}€</td></tr>
+                                        <tr><td>Totale Assegni</td><td class="text-end">${data.totali.assegni.toFixed(2)}€</td></tr>
+                                        <tr><td>Totale Bonifico</td><td class="text-end">${data.totali.bonifico.toFixed(2)}€</td></tr>
+                                        <tr><td>Totale Finanziamento</td><td class="text-end">${data.totali.finanziamento.toFixed(2)}€</td></tr>
+                                        <tr><td>Totale Negozio</td><td class="text-end">${data.totali.negozio.toFixed(2)}€</td></tr>
+                                        <tr class="table-success"><td class="fw-bold">Totale</td><td class="text-end fw-bold">${data.totali.saldato.toFixed(2)}€</td></tr>
+                                        <tr class="table-warning"><td>Totale Sospeso</td><td class="text-end">${data.totali.sospeso.toFixed(2)}€</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } catch (error) {
+                console.error("❌ Errore nel caricamento dati:", error);
+            }
+        }
+
+        // Imposta la data corrente all'avvio
+        window.onload = function() {
+            const oggi = new Date();
+            const dataOggi = oggi.toISOString().split('T')[0];
+            document.getElementById("data_da").value = dataOggi;
+            document.getElementById("data_a").value = dataOggi;
+            aggiornaTabellaHeader();
+        };
+        
+        // Registrazione Service Worker per PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registrato', reg))
+                    .catch(err => console.log('[PWA] Errore registrazione SW', err));
+            });
+        }
+    </script>
+</body>
+</html>

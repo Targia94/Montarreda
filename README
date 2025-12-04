@@ -1,0 +1,4 @@
+#pyinstaller --onedir --name=start --add-data "index.html;." --add-data "dashboard.html;." --add-data "esportazione.html;." --add-data "timbrature.html;." --add-data "lavoro.html;." app_launcher.py
+
+
+venv\Scripts\pyinstaller --clean --onedir --name=start --add-data "index.html;." --add-data "dashboard.html;." --add-data "esportazione.html;." --add-data "timbrature.html;." --add-data "lavoro.html;." --add-data "static;static" --additional-hooks-dir=hooks app_launcher.py

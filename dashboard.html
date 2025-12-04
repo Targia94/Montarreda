@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Montarreda">
+    <link rel="apple-touch-icon" href="static/icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <title>Dashboard - Montarreda</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    <!-- Database and API -->
+    <script src="static/js/db.js"></script>
+    <script src="static/js/api.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-cube text-primary"></i> Montarreda
+            </div>
+            <ul class="sidebar-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link active">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="timbrature.html" class="nav-link">
+                        <i class="fas fa-clock"></i> Timbrature
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="lavoro.html" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i> Lavoro
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="esportazione.html" class="nav-link">
+                        <i class="fas fa-file-export"></i> Esportazione
+                    </a>
+                </li>
+            </ul>
+            <div class="p-3">
+                <button class="btn btn-danger w-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary d-md-none me-3" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="m-0">Dashboard</h4>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-secondary small">Giovanni</span>
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="card border-0 shadow-sm bg-primary text-white p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h2 class="text-white mb-1">Benvenuto in Montarreda</h2>
+                                    <p class="mb-0 opacity-75">Gestisci le tue attività in modo semplice e veloce.</p>
+                                </div>
+                                <i class="fas fa-chart-line fa-4x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <a href="timbrature.html" class="text-decoration-none">
+                            <div class="card h-100 hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="bg-blue-50 text-primary rounded-circle d-inline-flex p-3 mb-3" style="background-color: #e0e7ff;">
+                                        <i class="fas fa-clock fa-2x"></i>
+                                    </div>
+                                    <h5 class="card-title">Timbrature</h5>
+                                    <p class="text-secondary small">Registra i tuoi orari di ingresso e uscita.</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <a href="lavoro.html" class="text-decoration-none">
+                            <div class="card h-100 hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="bg-green-50 text-success rounded-circle d-inline-flex p-3 mb-3" style="background-color: #dcfce7;">
+                                        <i class="fas fa-clipboard-list fa-2x"></i>
+                                    </div>
+                                    <h5 class="card-title">Inserimento Lavoro</h5>
+                                    <p class="text-secondary small">Aggiungi nuovi lavori e commesse.</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <a href="esportazione.html" class="text-decoration-none">
+                            <div class="card h-100 hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="bg-orange-50 text-warning rounded-circle d-inline-flex p-3 mb-3" style="background-color: #fef3c7;">
+                                        <i class="fas fa-file-export fa-2x"></i>
+                                    </div>
+                                    <h5 class="card-title">Esportazione</h5>
+                                    <p class="text-secondary small">Scarica report e riepiloghi in PDF.</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+        
+        // Registrazione Service Worker per PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registrato', reg))
+                    .catch(err => console.log('[PWA] Errore registrazione SW', err));
+            });
+        }
+    </script>
+
+</body>
+</html>
