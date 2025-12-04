@@ -26,15 +26,6 @@ const DB = {
                     console.log('📦 Created users table');
                 }
 
-                // Timbrature table
-                if (!db.objectStoreNames.contains('timbrature')) {
-                    const timbratureStore = db.createObjectStore('timbrature', { keyPath: 'id', autoIncrement: true });
-                    timbratureStore.createIndex('id_utente', 'id_utente', { unique: false });
-                    timbratureStore.createIndex('data', 'data', { unique: false });
-                    timbratureStore.createIndex('utente_data', ['id_utente', 'data'], { unique: false });
-                    console.log('📦 Created timbrature table');
-                }
-
                 // Lavori table
                 if (!db.objectStoreNames.contains('lavori')) {
                     const lavoriStore = db.createObjectStore('lavori', { keyPath: 'id', autoIncrement: true });

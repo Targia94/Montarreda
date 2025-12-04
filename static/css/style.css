@@ -339,4 +339,135 @@ a {
     .main-content {
         margin-left: 0;
     }
+    
+    .content-wrapper {
+        padding: 1rem;
+    }
+    
+    .topbar {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Better touch targets on mobile */
+    .btn {
+        min-height: 44px;
+        padding: 0.75rem 1.25rem;
+    }
+    
+    .form-control, .form-select {
+        min-height: 44px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Card spacing */
+    .card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Table improvements */
+    .table {
+        font-size: 0.8125rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+    
+    /* Dashboard cards */
+    .col-md-6, .col-md-4 {
+        margin-bottom: 1rem;
+    }
+}
+
+/* iPhone specific optimizations */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    /* Stack form controls vertically */
+    .row.g-3 {
+        gap: 0.75rem !important;
+    }
+    
+    .col-auto {
+        width: 100%;
+    }
+    
+    /* Better table on small screens */
+    .table-responsive {
+        border-radius: var(--radius-md);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Larger text for readability */
+    body {
+        font-size: 15px;
+    }
+    
+    h4 {
+        font-size: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+}
+
+/* iPad specific optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .content-wrapper {
+        padding: 1.5rem;
+    }
+    
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* iOS safe area support */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+    
+    .topbar {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+    
+    .sidebar {
+        padding-left: env(safe-area-inset-left);
+    }
+}
+
+/* Prevent text selection on buttons (better UX on mobile) */
+.btn, .nav-link {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Better focus states for accessibility */
+.form-control:focus,
+.form-select:focus,
+.btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }

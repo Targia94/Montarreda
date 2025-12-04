@@ -32,53 +32,6 @@ const API = {
         return await DB.getAll('users');
     },
 
-    // ==================== TIMBRATURE ====================
-    
-    async getTimbrature(userId, date) {
-        try {
-            const allTimbrature = await DB.getByIndex('timbrature', 'utente_data', [parseInt(userId), date]);
-            return allTimbrature;
-        } catch (error) {
-            console.error('Get timbrature error:', error);
-            return [];
-        }
-    },
-
-    async saveTimbratura(data, sostituisci = false) {
-        try {
-            // Check if timbratura already exists for this user and date
-            const existing = await DB.getByIndex('timbrature', 'utente_data', [data.id_utente, data.data]);
-            
-            if (existing.length > 0 && !sostituisci) {
-                return { modifica: true, message: 'Timbratura già esistente' };
-            }
-
-            if (existing.length > 0 && sostituisci) {
-                // Update existing
-                const updated = { ...existing[0], ...data };
-                await DB.update('timbrature', updated);
-                return { success: true, message: 'Timbratura aggiornata' };
-            }
-
-            // Add new
-            await DB.add('timbrature', data);
-            return { success: true, message: 'Timbratura salvata' };
-        } catch (error) {
-            console.error('Save timbratura error:', error);
-            throw error;
-        }
-    },
-
-    async deleteTimbratura(id) {
-        try {
-            await DB.delete('timbrature', parseInt(id));
-            return { success: true };
-        } catch (error) {
-            console.error('Delete timbratura error:', error);
-            throw error;
-        }
-    },
-
     // ==================== LAVORI ====================
     
     async getLavori(date) {
@@ -184,34 +137,53 @@ const API = {
 
             const { lavori, totali } = await this.getAttivita(filters);
 
+            if (lavori.length === 0) {
+                alert('Nessuna attività trovata per il periodo selezionato');
+                return { success: false };
+            }
+
+            // Calcoli come in Python
+            const totale_contratto = lavori.reduce((sum, l) => sum + (l.contratto || 0), 0);
+            const totale_saldato = lavori.reduce((sum, l) => sum + (l.saldato || 0), 0);
+            const extra_su_consegne = lavori.reduce((sum, l) => sum + (l.extra_consegna || 0), 0);
+            const percentuale_trasporto = totale_contratto * 0.06;
+            const totale_lordo = percentuale_trasporto + extra_su_consegne;
+
+            const totale_contanti = totali.contanti;
+            const totale_assegni = totali.assegni;
+            const totale_bonifico = totali.bonifico;
+            const totale_finanziamento = totali.finanziamento || 0;
+            const totale_negozio = totali.negozio;
+            const totale_sospeso = totali.sospeso;
+
             // Create PDF using jsPDF
             const { jsPDF } = jspdf;
             const doc = new jsPDF();
 
-            // Title
-            doc.setFontSize(18);
-            doc.text('Report Attività', 105, 15, { align: 'center' });
+            // Title - esattamente come Python
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Attivita | ${filters.data_da || ''} - ${filters.data_a || ''}`, 105, 15, { align: 'center' });
 
-            // Date range
-            doc.setFontSize(10);
-            if (filters.data_da && filters.data_a) {
-                doc.text(`Periodo: ${filters.data_da} - ${filters.data_a}`, 105, 25, { align: 'center' });
-            }
+            doc.setLineWidth(0.1);
 
-            // Table header
+            // Spaziatura prima della tabella
             let y = 35;
-            doc.setFontSize(9);
-            doc.setFont(undefined, 'bold');
-            doc.text('Commessa', 10, y);
-            doc.text('Data', 40, y);
-            doc.text('Cliente', 65, y);
-            doc.text('Contratto', 110, y);
-            doc.text('Saldato', 145, y);
-            doc.text('Extra', 175, y);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            
+            // Header row - larghezze esatte come Python
+            doc.cell(10, y - 5, 20, 10, 'Commessa', undefined, 'left');
+            doc.cell(30, y - 5, 25, 10, 'Data', undefined, 'left');
+            doc.cell(55, y - 5, 40, 10, 'Cliente', undefined, 'left');
+            doc.cell(95, y - 5, 25, 10, 'Pagamento', undefined, 'left');
+            doc.cell(120, y - 5, 25, 10, 'Contratto', undefined, 'left');
+            doc.cell(145, y - 5, 25, 10, 'Saldo', undefined, 'left');
+            doc.cell(170, y - 5, 20, 10, 'Extra', undefined, 'left');
 
             // Table rows
-            doc.setFont(undefined, 'normal');
-            y += 7;
+            doc.setFont('helvetica', 'normal');
+            y += 10;
 
             lavori.forEach(l => {
                 if (y > 270) {
@@ -219,31 +191,86 @@ const API = {
                     y = 20;
                 }
 
-                doc.text(l.commessa || '', 10, y);
-                doc.text(l.data || '', 40, y);
-                doc.text((l.cliente || '').substring(0, 20), 65, y);
-                doc.text(`€${(l.contratto || 0).toFixed(2)}`, 110, y);
-                doc.text(`€${(l.saldato || 0).toFixed(2)}`, 145, y);
-                doc.text(`€${(l.extra_consegna || 0).toFixed(2)}`, 175, y);
+                // Dati con simbolo € come in Python
+                doc.cell(10, y - 5, 20, 10, (l.commessa || '').substring(0, 8), undefined, 'left');
+                doc.cell(30, y - 5, 25, 10, (l.data || '').substring(0, 10), undefined, 'left');
+                doc.cell(55, y - 5, 40, 10, (l.cliente || '').substring(0, 15), undefined, 'left');
+                doc.cell(95, y - 5, 25, 10, (l.saldo || '').substring(0, 12), undefined, 'left');
+                doc.cell(120, y - 5, 25, 10, `${(l.contratto || 0).toFixed(2)} €`, undefined, 'left');
+                doc.cell(145, y - 5, 25, 10, `${(l.saldato || 0).toFixed(2)} €`, undefined, 'left');
+                doc.cell(170, y - 5, 20, 10, `${(l.extra_consegna || 0).toFixed(2)} €`, undefined, 'left');
 
-                y += 6;
+                y += 10;
             });
 
-            // Totals
+            // Totals row - esattamente come Python
+            doc.setFont('helvetica', 'bold');
+            doc.cell(10, y - 5, 110, 10, 'Totale', undefined, 'right');
+            doc.cell(120, y - 5, 25, 10, `${totale_contratto.toFixed(2)} €`, undefined, 'left');
+            doc.cell(145, y - 5, 25, 10, `${totale_saldato.toFixed(2)} €`, undefined, 'left');
+            doc.cell(170, y - 5, 20, 10, `${extra_su_consegne.toFixed(2)} €`, undefined, 'left');
+
+            // Riepilogo Totali
+            y += 20;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Riepilogo Totali', 10, y);
+            
             y += 10;
-            doc.setFont(undefined, 'bold');
-            doc.text('Totali:', 10, y);
-            doc.setFont(undefined, 'normal');
-            y += 7;
-            doc.text(`Contanti: €${totali.contanti.toFixed(2)}`, 10, y);
-            y += 6;
-            doc.text(`Assegni: €${totali.assegni.toFixed(2)}`, 10, y);
-            y += 6;
-            doc.text(`Bonifico: €${totali.bonifico.toFixed(2)}`, 10, y);
-            y += 6;
-            doc.text(`Finanziamento: €${totali.finanziamento.toFixed(2)}`, 10, y);
-            y += 6;
-            doc.text(`Totale Saldato: €${totali.saldato.toFixed(2)}`, 10, y);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+
+            // Totali table
+            doc.cell(10, y - 5, 80, 10, 'Totale Contratto:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${totale_contratto.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.cell(10, y - 5, 80, 10, 'Percentuale trasporto (6%):', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${percentuale_trasporto.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.cell(10, y - 5, 80, 10, 'Extra su consegne:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${extra_su_consegne.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.setFont('helvetica', 'bold');
+            doc.cell(10, y - 5, 80, 10, 'Totale Lordo:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${totale_lordo.toFixed(2)} €`, undefined, 'left');
+
+            // Dettaglio Saldi
+            y += 15;
+            doc.setFontSize(12);
+            doc.text('Dettaglio Saldi', 10, y);
+            
+            y += 10;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+
+            doc.cell(10, y - 5, 80, 10, 'Totale Contanti:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${totale_contanti.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.cell(10, y - 5, 80, 10, 'Totale Assegni:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${totale_assegni.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.cell(10, y - 5, 80, 10, 'Totale Bonifico:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${totale_bonifico.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.cell(10, y - 5, 80, 10, 'Totale Negozio:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${totale_negozio.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.setFont('helvetica', 'bold');
+            doc.cell(10, y - 5, 80, 10, 'Totale:', undefined, 'left');
+            const totale_pagamenti = totale_contanti + totale_assegni + totale_bonifico + totale_negozio;
+            doc.cell(90, y - 5, 40, 10, `${totale_pagamenti.toFixed(2)} €`, undefined, 'left');
+            y += 10;
+
+            doc.setFont('helvetica', 'normal');
+            doc.cell(10, y - 5, 80, 10, 'Totale Sospeso:', undefined, 'left');
+            doc.cell(90, y - 5, 40, 10, `${totale_sospeso.toFixed(2)} €`, undefined, 'left');
 
             // Download PDF
             doc.save('attivita.pdf');
@@ -251,6 +278,91 @@ const API = {
             return { success: true };
         } catch (error) {
             console.error('Export PDF error:', error);
+            throw error;
+        }
+    },
+
+    // ==================== BACKUP/RESTORE ====================
+    
+    async exportData() {
+        try {
+            const users = await DB.getAll('users');
+            const lavori = await DB.getAll('lavori');
+
+            const backup = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                data: {
+                    users,
+                    lavori
+                }
+            };
+
+            // Create JSON file and download
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `montarreda-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            return { success: true, message: 'Backup creato con successo!' };
+        } catch (error) {
+            console.error('Export data error:', error);
+            throw error;
+        }
+    },
+
+    async importData(file) {
+        try {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = async (e) => {
+                    try {
+                        const backup = JSON.parse(e.target.result);
+                        
+                        // Validate backup structure
+                        if (!backup.data || !backup.data.users || !backup.data.lavori) {
+                            throw new Error('File di backup non valido');
+                        }
+
+                        // Confirm before overwriting
+                        if (!confirm('⚠️ Questo sovrascriverà tutti i dati esistenti. Continuare?')) {
+                            resolve({ success: false, message: 'Importazione annullata' });
+                            return;
+                        }
+
+                        // Clear existing data
+                        await DB.clear('users');
+                        await DB.clear('lavori');
+
+                        // Import users
+                        for (const user of backup.data.users) {
+                            await DB.add('users', user);
+                        }
+
+                        // Import lavori
+                        for (const lavoro of backup.data.lavori) {
+                            await DB.add('lavori', lavoro);
+                        }
+
+                        resolve({ 
+                            success: true, 
+                            message: `Importati ${backup.data.users.length} utenti e ${backup.data.lavori.length} lavori!` 
+                        });
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+
+                reader.onerror = () => reject(new Error('Errore nella lettura del file'));
+                reader.readAsText(file);
+            });
+        } catch (error) {
+            console.error('Import data error:', error);
             throw error;
         }
     }
