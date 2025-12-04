@@ -172,14 +172,15 @@ const API = {
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             
-            // Header row - larghezze esatte come Python
-            doc.cell(10, y - 5, 20, 10, 'Commessa', undefined, 'left');
-            doc.cell(30, y - 5, 25, 10, 'Data', undefined, 'left');
-            doc.cell(55, y - 5, 40, 10, 'Cliente', undefined, 'left');
-            doc.cell(95, y - 5, 25, 10, 'Pagamento', undefined, 'left');
-            doc.cell(120, y - 5, 25, 10, 'Contratto', undefined, 'left');
-            doc.cell(145, y - 5, 25, 10, 'Saldo', undefined, 'left');
-            doc.cell(170, y - 5, 20, 10, 'Extra', undefined, 'left');
+            // Header row - intestazioni abbreviate e larghezze ottimizzate
+            doc.cell(10, y - 5, 18, 10, 'Comm.', undefined, 'left');
+            doc.cell(28, y - 5, 25, 10, 'Data', undefined, 'left');
+            doc.cell(53, y - 5, 35, 10, 'Cliente', undefined, 'left');
+            doc.cell(88, y - 5, 18, 10, 'Nr. Rif.', undefined, 'left');
+            doc.cell(106, y - 5, 20, 10, 'Pag.', undefined, 'left');
+            doc.cell(126, y - 5, 23, 10, 'Contr.', undefined, 'left');
+            doc.cell(149, y - 5, 23, 10, 'Saldo', undefined, 'left');
+            doc.cell(172, y - 5, 23, 10, 'Extra', undefined, 'left');
 
             // Table rows
             doc.setFont('helvetica', 'normal');
@@ -192,23 +193,24 @@ const API = {
                 }
 
                 // Dati con simbolo € come in Python
-                doc.cell(10, y - 5, 20, 10, (l.commessa || '').substring(0, 8), undefined, 'left');
-                doc.cell(30, y - 5, 25, 10, (l.data || '').substring(0, 10), undefined, 'left');
-                doc.cell(55, y - 5, 40, 10, (l.cliente || '').substring(0, 15), undefined, 'left');
-                doc.cell(95, y - 5, 25, 10, (l.saldo || '').substring(0, 12), undefined, 'left');
-                doc.cell(120, y - 5, 25, 10, `${(l.contratto || 0).toFixed(2)} €`, undefined, 'left');
-                doc.cell(145, y - 5, 25, 10, `${(l.saldato || 0).toFixed(2)} €`, undefined, 'left');
-                doc.cell(170, y - 5, 20, 10, `${(l.extra_consegna || 0).toFixed(2)} €`, undefined, 'left');
+                doc.cell(10, y - 5, 18, 10, (l.commessa || '').substring(0, 6), undefined, 'left');
+                doc.cell(28, y - 5, 25, 10, (l.data || '').substring(0, 10), undefined, 'left');
+                doc.cell(53, y - 5, 35, 10, (l.cliente || '').substring(0, 15), undefined, 'left');
+                doc.cell(88, y - 5, 18, 10, (l.nr_riferimento || '-').substring(0, 8), undefined, 'left');
+                doc.cell(106, y - 5, 20, 10, (l.saldo || '').substring(0, 9), undefined, 'left');
+                doc.cell(126, y - 5, 23, 10, `${(l.contratto || 0).toFixed(2)} €`, undefined, 'left');
+                doc.cell(149, y - 5, 23, 10, `${(l.saldato || 0).toFixed(2)} €`, undefined, 'left');
+                doc.cell(172, y - 5, 23, 10, `${(l.extra_consegna || 0).toFixed(2)} €`, undefined, 'left');
 
                 y += 10;
             });
 
             // Totals row - esattamente come Python
             doc.setFont('helvetica', 'bold');
-            doc.cell(10, y - 5, 110, 10, 'Totale', undefined, 'right');
-            doc.cell(120, y - 5, 25, 10, `${totale_contratto.toFixed(2)} €`, undefined, 'left');
-            doc.cell(145, y - 5, 25, 10, `${totale_saldato.toFixed(2)} €`, undefined, 'left');
-            doc.cell(170, y - 5, 20, 10, `${extra_su_consegne.toFixed(2)} €`, undefined, 'left');
+            doc.cell(10, y - 5, 116, 10, 'Totale', undefined, 'right');
+            doc.cell(126, y - 5, 23, 10, `${totale_contratto.toFixed(2)} €`, undefined, 'left');
+            doc.cell(149, y - 5, 23, 10, `${totale_saldato.toFixed(2)} €`, undefined, 'left');
+            doc.cell(172, y - 5, 23, 10, `${extra_su_consegne.toFixed(2)} €`, undefined, 'left');
 
             // Riepilogo Totali
             y += 20;
