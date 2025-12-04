@@ -82,7 +82,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6 col-lg-4">
                         <a href="lavoro.html" class="text-decoration-none">
                             <div class="card h-100 hover-shadow transition-all">
                                 <div class="card-body text-center p-4">
@@ -96,7 +96,7 @@
                         </a>
                     </div>
                     
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-12 col-md-6 col-lg-4">
                         <a href="esportazione.html" class="text-decoration-none">
                             <div class="card h-100 hover-shadow transition-all">
                                 <div class="card-body text-center p-4">
@@ -186,7 +186,8 @@
         // Registrazione Service Worker per PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                // Usa path relativo per GitHub Pages
+                navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('[PWA] Service Worker registrato', reg))
                     .catch(err => console.log('[PWA] Errore registrazione SW', err));
             });
