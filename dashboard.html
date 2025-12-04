@@ -113,14 +113,69 @@
                             </div>
                         </a>
                     </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="bg-purple-50 text-primary rounded-circle d-inline-flex p-3 mb-3" style="background-color: #f3e8ff;">
+                                    <i class="fas fa-database fa-2x"></i>
+                                </div>
+                                <h5 class="card-title">Backup Dati</h5>
+                                <p class="text-secondary small mb-3">Esporta e importa i tuoi dati per sicurezza.</p>
+                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                    <button onclick="esportaDati()" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-download"></i> Esporta
+                                    </button>
+                                    <label for="importFile" class="btn btn-outline-secondary btn-sm mb-0" style="cursor: pointer;">
+                                        <i class="fas fa-upload"></i> Importa
+                                    </label>
+                                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importaDati(event)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        async function esportaDati() {
+            try {
+                const result = await API.exportData();
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Errore export:', error);
+                alert('❌ Errore durante l\'esportazione dei dati');
+            }
+        }
+
+        async function importaDati(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const result = await API.importData(file);
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    // Reload page to show new data
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert('ℹ️ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Errore import:', error);
+                alert('❌ Errore durante l\'importazione: ' + error.message);
+            } finally {
+                // Reset file input
+                event.target.value = '';
+            }
+        }
+
         function logout() {
-            localStorage.removeItem("token");
+            localStorage.removeItem("currentUser");
             window.location.href = "index.html";
         }
 

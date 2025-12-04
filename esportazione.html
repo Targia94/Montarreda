@@ -267,7 +267,12 @@
         // Imposta la data corrente all'avvio
         window.onload = function() {
             const oggi = new Date();
-            const dataOggi = oggi.toISOString().split('T')[0];
+            // Usa il fuso orario locale per evitare problemi con UTC
+            const anno = oggi.getFullYear();
+            const mese = String(oggi.getMonth() + 1).padStart(2, '0');
+            const giorno = String(oggi.getDate()).padStart(2, '0');
+            const dataOggi = `${anno}-${mese}-${giorno}`;
+            
             document.getElementById("data_da").value = dataOggi;
             document.getElementById("data_a").value = dataOggi;
             aggiornaTabellaHeader();
