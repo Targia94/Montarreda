@@ -6,7 +6,6 @@ const STATIC_ASSETS = [
   '/index.html',
   '/dashboard.html',
   '/esportazione.html',
-  '/timbrature.html',
   '/lavoro.html',
   '/static/css/style.css',
   '/static/js/db.js',
