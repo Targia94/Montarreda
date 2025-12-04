@@ -115,7 +115,7 @@
                             <table class="table">
                                 <thead id="tabella-header"></thead>
                                 <tbody id="risultati">
-                                    <tr><td colspan="7" class="text-center text-muted py-5">
+                                    <tr><td colspan="8" class="text-center text-muted py-5">
                                         <i class="fas fa-table fa-3x mb-3 d-block opacity-25"></i>
                                         Seleziona i parametri e clicca "Carica" per visualizzare i dati
                                     </td></tr>
@@ -161,6 +161,7 @@
                     <th>Commessa</th>
                     <th>Data</th>
                     <th>Cliente</th>
+                    <th>Nr. Riferimento</th>
                     <th>Pagamento</th>
                     <th>Contratto</th>
                     <th>Saldo</th>
@@ -180,7 +181,7 @@
                 risultati.innerHTML = "";
 
                 if (data.lavori.length === 0) {
-                    risultati.innerHTML = `<tr><td colspan="7" class="text-center">Nessuna attività trovata</td></tr>`;
+                    risultati.innerHTML = `<tr><td colspan="8" class="text-center">Nessuna attività trovata</td></tr>`;
                     return;
                 }
 
@@ -200,6 +201,7 @@
                         <td>${l.commessa}</td>
                         <td>${l.data}</td>
                         <td>${l.cliente}</td>
+                        <td>${l.nr_riferimento || '-'}</td>
                         <td>${l.saldo}</td>
                         <td>${l.contratto.toFixed(2)}€</td>
                         <td>${l.saldato.toFixed(2)}€</td>
@@ -212,7 +214,7 @@
 
                 risultati.innerHTML += `
                     <tr class="fw-bold">
-                        <td colspan="4">Totale</td>
+                        <td colspan="5">Totale</td>
                         <td>${totaleContratto.toFixed(2)}€</td>
                         <td>${totaleSaldato.toFixed(2)}€</td>
                         <td>${extraSuConsegne.toFixed(2)}€</td>
